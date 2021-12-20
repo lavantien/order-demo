@@ -1,4 +1,4 @@
-# Production-ready Order System Demo
+# Production-ready Simple Order Service Demo
 
 ## Requirements
 
@@ -7,19 +7,26 @@
 - [ ] Create new order with payment
 - [ ] Users can login, sign up
 
+## Database UML
+
+![Database UML](/resources/readme/order-demo.png "Database UML")
+
 ## Technology Stack
 
 - **Go 1.17**: *Leverage the standard libraries as much as possible*
 - **SQLc**: *Generates efficient native SQL CRUD code*
 - **PostgreSQL**: *RDBMS of choice because of faster read due to its indexing model and safer transaction with better isolation levels handling*
-- **MySQL**: *Is also support to demonstrate about a highly decoupling structure*
 - **Gin**: *Fast and have respect for native net/http API*
 - **Paseto Token**: *Better choice than JWT because of enforcing better cryptographic standards and debloated of useless information*
-- **JWT**: *Is also support to demonstrate highly decoupling structure*
 - **Golang-Migrate**: *Efficient schema generating, up/down migrating*
 - **GoMock**: *Generates mocks of about anything*
 - **Docker** + **Docker-Compose**: *Containerization, what else to say ...*
 - **Github Actions CI**: *Make sure we don't push trash code into the codebase*
+- **Viper**: *Add robustness to configurations*
+
+## Philosophy and Architecture
+
+- **Adaptive Minimalist**: *We always keep it as simple as possible, but with a highly decouple structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
 
 ## Usage
 
@@ -29,19 +36,52 @@
 make server
 ```
 
+- Run Web UI:
+
+```bash
+make web
+
+# Access Web UI via http://localhost:4321
+```
+
 - Run test:
 
 ```bash
 make test
 ```
 
-## Philosophy and Architecture
-
-- **Adaptive Minimalist**: *We always keep it as simple as possible, but with a highly decouple structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
-
 ## Development Infrastructure Setup
 
-### Tooling Installation Guide
+### Helpful Commands
+
+```bash
+# Spin up a container for local development, for example postgres
+# The default database will be root, the same name as POSTGRES_USER
+docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:alpine
+
+# To access postgres psql
+docker exec -it postgres psql -U root
+
+# To access container console and run postgres commands
+docker exec -it postgres /bin/sh
+
+# To quit the console
+\q
+
+# To view its logs
+docker logs postgres
+
+# To stop it
+docker stop postgres
+
+# To just run it again
+docker start postgres
+
+# To remove it completely
+docker rm postgres
+```
+
+### Toolings Installation Guide
 
 - [**Golang**](https://go.dev/doc/install):
 
@@ -121,6 +161,12 @@ go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
 go install github.com/golang/mock/mockgen@latest
 ```
 
+- [**Viper**](https://github.com/spf13/viper):
+
+```bash
+go install https://github.com/spf13/viper@latest
+```
+
 - [**Chocolatery**](https://docs.chocolatey.org/en-us/choco/setup) + [**Make**](https://community.chocolatey.org/packages/make):
 
 ```bash
@@ -134,6 +180,12 @@ choco install make
 ```
 
 ### Infrastructure
+
+- Create order-demo-network
+
+```bash
+make network
+```
 
 - Start postgres container:
 
