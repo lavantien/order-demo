@@ -26,7 +26,7 @@
 
 ## Philosophy and Architecture
 
-- **Adaptive Minimalist**: *We always keep it as simple as possible, but with a highly decouple structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
+- **Adaptive Minimalist**: *I always keep it as simple as possible, but with a highly decoupled structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
 
 ## Usage
 
