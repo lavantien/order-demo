@@ -1,5 +1,7 @@
 # Production-ready Simple Order Service Demo
 
+![ci-test](https://github.com/lavantien/order-demo/actions/workflows/ci.yml/badge.svg?branch=main)
+
 ## Requirements
 
 - [ ] View list of products
@@ -29,6 +31,14 @@
 - **Adaptive Minimalist**: *I always keep it as simple as possible, but with a highly decoupled structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
 
 ## Usage
+
+- Run createdb and migrateup:
+
+```bash
+make createdb
+
+make migrateup
+```
 
 - Run test:
 
