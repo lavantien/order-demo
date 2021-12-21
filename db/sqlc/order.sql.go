@@ -60,28 +60,6 @@ func (q *Queries) GetOrder(ctx context.Context, id int64) (Order, error) {
 	return i, err
 }
 
-const getOrderForUpdate = `-- name: GetOrderForUpdate :one
-SELECT id, user_id, product_id, quantity, price, created_at
-FROM orders
-WHERE id = $1
-LIMIT 1 FOR NO KEY
-UPDATE
-`
-
-func (q *Queries) GetOrderForUpdate(ctx context.Context, id int64) (Order, error) {
-	row := q.db.QueryRowContext(ctx, getOrderForUpdate, id)
-	var i Order
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.ProductID,
-		&i.Quantity,
-		&i.Price,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const listOrders = `-- name: ListOrders :many
 SELECT id, user_id, product_id, quantity, price, created_at
 FROM orders

@@ -30,24 +30,16 @@
 
 ## Usage
 
-- Run server:
-
-```bash
-make server
-```
-
-- Run Web UI:
-
-```bash
-make web
-
-# Access Web UI via http://localhost:4321
-```
-
 - Run test:
 
 ```bash
 make test
+```
+
+- Run server:
+
+```bash
+make server
 ```
 
 ## Development Infrastructure Setup

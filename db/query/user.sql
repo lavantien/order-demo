@@ -7,12 +7,6 @@ SELECT *
 FROM users
 WHERE id = $1
 LIMIT 1;
--- name: GetUserForUpdate :one
-SELECT *
-FROM users
-WHERE id = $1
-LIMIT 1 FOR NO KEY
-UPDATE;
 -- name: ListUsers :many
 SELECT *
 FROM users

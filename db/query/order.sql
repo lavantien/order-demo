@@ -7,12 +7,6 @@ SELECT *
 FROM orders
 WHERE id = $1
 LIMIT 1;
--- name: GetOrderForUpdate :one
-SELECT *
-FROM orders
-WHERE id = $1
-LIMIT 1 FOR NO KEY
-UPDATE;
 -- name: ListOrders :many
 SELECT *
 FROM orders
