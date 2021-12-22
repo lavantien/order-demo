@@ -43,6 +43,10 @@ make migrateup
 - Run test:
 
 ```bash
+go get github.com/golang/mock/mockgen/model
+
+make mock
+
 make test
 ```
 
@@ -169,16 +173,26 @@ go install github.com/golang/mock/mockgen@latest
 go install https://github.com/spf13/viper@latest
 ```
 
-- [**Chocolatery**](https://docs.chocolatey.org/en-us/choco/setup) + [**Make**](https://community.chocolatey.org/packages/make):
+- [**Gin**](https://github.com/gin-gonic/gin#installation):
 
 ```bash
+go install github.com/gin-gonic/gin@latest
+
+go get -u github.com/gin-gonic/gin
+```
+
+- [**CURL**](https://curl.se/download.html) + [**JQ**](https://stedolan.github.io/jq/) + [**Chocolatery**](https://docs.chocolatey.org/en-us/choco/setup) + [**Make**](https://community.chocolatey.org/packages/make):
+
+```bash
+sudo apt install curl jq
+
 # These tools are needed only for Windows users
 
 # Run this in an Admin cmd to install Chocolatery first
 @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 
-# Then install GNU-Make via Chocolatery
-choco install make
+# Then install GNU-Make, cURL, and jq via Chocolatery in Admin pwsh
+choco install make curl jq
 ```
 
 ### Infrastructure
