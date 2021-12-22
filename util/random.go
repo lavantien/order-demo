@@ -38,7 +38,7 @@ func RandomCost() int64 {
 }
 
 func RandomQuantity() int64 {
-	return RandomInt(0, 10)
+	return RandomInt(2, 10)
 }
 
 func RandomEmail() string {

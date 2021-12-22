@@ -4,10 +4,161 @@
 
 ## Requirements
 
-- [ ] View list of products
-- [ ] Add/Remove products from cart
-- [ ] Create new order with payment
-- [ ] Users can login, sign up
+1. [X] View list of products
+2. [X] Add/Remove product from cart
+3. [X] Create new order with payment
+4. [ ] Users can login, sign up
+
+- **Endpoints**:
+
+<details>
+	<summary>See details</summary>
+
+```bash
+# See Booting Up running and testing instructions in the section below first, and then:
+
+# Rqm1: View list of products
+curl http://localhost:8080/products?page_id=1&page_size=5 | jq
+# Should return
+[
+  {
+    "id": 1,
+    "name": "lxhoak",
+    "cost": 445,
+    "quantity": 6,
+    "created_at": "2021-12-20T19:25:16.15668Z"
+  },
+  {
+    "id": 2,
+    "name": "yyfxbi",
+    "cost": 777,
+    "quantity": 10,
+    "created_at": "2021-12-20T19:25:16.159625Z"
+  },
+  {
+    "id": 3,
+    "name": "vyloqc",
+    "cost": 975,
+    "quantity": 1,
+    "created_at": "2021-12-20T19:25:16.162256Z"
+  },
+  {
+    "id": 4,
+    "name": "csibko",
+    "cost": 271,
+    "quantity": 6,
+    "created_at": "2021-12-20T19:25:16.163474Z"
+  },
+  {
+    "id": 5,
+    "name": "aymlpf",
+    "cost": 93,
+    "quantity": 3,
+    "created_at": "2021-12-20T19:25:16.164919Z"
+  }
+]
+
+# Rqm2.1: Add product from cart
+curl http://localhost:8080/products/cart/add -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "product": {
+    "id": 1,
+    "name": "lxhoak",
+    "cost": 445,
+    "quantity": 4,
+    "created_at": "2021-12-20T19:25:16.15668Z"
+  }
+}
+
+# Rqm2.1: Add product from cart
+curl http://localhost:8080/products/cart/remove -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "product": {
+    "id": 1,
+    "name": "lxhoak",
+    "cost": 445,
+    "quantity": 8,
+    "created_at": "2021-12-20T19:25:16.15668Z"
+  }
+}
+
+# Rqm3.1: Create new order with payment
+curl http://localhost:8080/orders -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "user": {
+    "id": 1,
+    "email": "dhksfo@email.com",
+    "hashed_password": "lyxceaqfnueo",
+    "created_at": "2021-12-20T19:32:33.096859Z"
+  },
+  "product": {
+    "id": 1,
+    "name": "lxhoak",
+    "cost": 445,
+    "quantity": 4,
+    "created_at": "2021-12-20T19:25:16.15668Z"
+  },
+  "order": {
+    "id": 96,
+    "user_id": 1,
+    "product_id": 1,
+    "quantity": 2,
+    "price": 890,
+    "created_at": "2021-12-22T19:31:52.272728Z"
+  }
+}
+
+# Rqm3.2: Check the result
+curl http://localhost:8080/orders?page_id=1&page_size=5 | jq
+# Should return
+[
+  {
+    "id": 1,
+    "user_id": 13,
+    "product_id": 37,
+    "quantity": 9,
+    "price": 1962,
+    "created_at": "2021-12-20T19:42:26.68327Z"
+  },
+  {
+    "id": 2,
+    "user_id": 14,
+    "product_id": 38,
+    "quantity": 4,
+    "price": 1124,
+    "created_at": "2021-12-20T19:42:26.688983Z"
+  },
+  {
+    "id": 3,
+    "user_id": 15,
+    "product_id": 39,
+    "quantity": 0,
+    "price": 0,
+    "created_at": "2021-12-20T19:42:26.693553Z"
+  },
+  {
+    "id": 4,
+    "user_id": 16,
+    "product_id": 40,
+    "quantity": 3,
+    "price": 1578,
+    "created_at": "2021-12-20T19:42:26.697026Z"
+  },
+  {
+    "id": 5,
+    "user_id": 17,
+    "product_id": 41,
+    "quantity": 5,
+    "price": 3525,
+    "created_at": "2021-12-20T19:42:26.701013Z"
+  }
+]
+```
+
+</details>
 
 ## Database UML
 
@@ -28,9 +179,9 @@
 
 ## Philosophy and Architecture
 
-- **Adaptive Minimalist**: *I always keep it as simple as possible, but with a highly decoupled structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
+- **Adaptive Minimalism**: *I always keep it as simple as possible, but with a highly decoupled structure we ensure high adaptivity and extensibility, on top of that minimal solid head start. Things are implement only when they're absolutely needed*
 
-## Usage
+## Booting Up
 
 - Run createdb and migrateup:
 

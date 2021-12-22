@@ -6,6 +6,8 @@ import (
 	"order-demo/api"
 	db "order-demo/db/sqlc"
 	"order-demo/util"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
