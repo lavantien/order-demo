@@ -1,5 +1,5 @@
 -- name: CreateOrder :one
-INSERT INTO orders (user_id, product_id, quantity, price)
+INSERT INTO orders (owner, product_id, quantity, price)
 VALUES ($1, $2, $3, $4)
 RETURNING *;
 -- name: GetOrder :one

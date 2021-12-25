@@ -122,21 +122,21 @@ func randomOrder() db.Order {
 	price := product.Cost * quantity
 	return db.Order{
 		ID:        util.RandomInt(1, 1000),
-		UserID:    user.ID,
+		Owner:     user.Username,
 		ProductID: product.ID,
 		Quantity:  quantity,
 		Price:     price,
 	}
 }
 
-func requireBodyMatchOrder(t *testing.T, body *bytes.Buffer, order db.Order) {
-	data, err := ioutil.ReadAll(body)
-	require.NoError(t, err)
-	var gotOrder db.Order
-	err = json.Unmarshal(data, &gotOrder)
-	require.NoError(t, err)
-	require.Equal(t, gotOrder, order)
-}
+// func requireBodyMatchOrder(t *testing.T, body *bytes.Buffer, order db.Order) {
+// 	data, err := ioutil.ReadAll(body)
+// 	require.NoError(t, err)
+// 	var gotOrder db.Order
+// 	err = json.Unmarshal(data, &gotOrder)
+// 	require.NoError(t, err)
+// 	require.Equal(t, gotOrder, order)
+// }
 
 func requireBodyMatchOrders(t *testing.T, body *bytes.Buffer, orders []db.Order) {
 	data, err := ioutil.ReadAll(body)
@@ -161,12 +161,12 @@ func TestCreateOrderAPI(t *testing.T) {
 		{
 			name: "OK",
 			body: gin.H{
-				"user_id":    user.ID,
+				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   quantity,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.ID)).Times(1).Return(user, nil)
+				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
 				store.EXPECT().GetProduct(gomock.Any(), gomock.Eq(product.ID)).Times(1).Return(product, nil)
 				arg := db.OrderTxParams{
 					User:     user,
@@ -182,7 +182,7 @@ func TestCreateOrderAPI(t *testing.T) {
 		{
 			name: "NegativeQuantity",
 			body: gin.H{
-				"user_id":    user.ID,
+				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   -1,
 			},
@@ -198,12 +198,12 @@ func TestCreateOrderAPI(t *testing.T) {
 		{
 			name: "OrderTxError",
 			body: gin.H{
-				"user_id":    user.ID,
+				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   quantity,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.ID)).Times(1).Return(user, nil)
+				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
 				store.EXPECT().GetProduct(gomock.Any(), gomock.Eq(product.ID)).Times(1).Return(product, nil)
 				store.EXPECT().OrderTx(gomock.Any(), gomock.Any()).Times(1).Return(db.OrderTxResult{}, sql.ErrTxDone)
 			},

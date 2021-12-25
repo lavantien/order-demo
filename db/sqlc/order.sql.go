@@ -8,21 +8,21 @@ import (
 )
 
 const createOrder = `-- name: CreateOrder :one
-INSERT INTO orders (user_id, product_id, quantity, price)
+INSERT INTO orders (owner, product_id, quantity, price)
 VALUES ($1, $2, $3, $4)
-RETURNING id, user_id, product_id, quantity, price, created_at
+RETURNING id, owner, product_id, quantity, price, created_at
 `
 
 type CreateOrderParams struct {
-	UserID    int64 `json:"user_id"`
-	ProductID int64 `json:"product_id"`
-	Quantity  int64 `json:"quantity"`
-	Price     int64 `json:"price"`
+	Owner     string `json:"owner"`
+	ProductID int64  `json:"product_id"`
+	Quantity  int64  `json:"quantity"`
+	Price     int64  `json:"price"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
 	row := q.db.QueryRowContext(ctx, createOrder,
-		arg.UserID,
+		arg.Owner,
 		arg.ProductID,
 		arg.Quantity,
 		arg.Price,
@@ -30,7 +30,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 	var i Order
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Owner,
 		&i.ProductID,
 		&i.Quantity,
 		&i.Price,
@@ -40,7 +40,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 }
 
 const getOrder = `-- name: GetOrder :one
-SELECT id, user_id, product_id, quantity, price, created_at
+SELECT id, owner, product_id, quantity, price, created_at
 FROM orders
 WHERE id = $1
 LIMIT 1
@@ -51,7 +51,7 @@ func (q *Queries) GetOrder(ctx context.Context, id int64) (Order, error) {
 	var i Order
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Owner,
 		&i.ProductID,
 		&i.Quantity,
 		&i.Price,
@@ -61,7 +61,7 @@ func (q *Queries) GetOrder(ctx context.Context, id int64) (Order, error) {
 }
 
 const listOrders = `-- name: ListOrders :many
-SELECT id, user_id, product_id, quantity, price, created_at
+SELECT id, owner, product_id, quantity, price, created_at
 FROM orders
 ORDER BY id
 LIMIT $1 OFFSET $2
@@ -83,7 +83,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 		var i Order
 		if err := rows.Scan(
 			&i.ID,
-			&i.UserID,
+			&i.Owner,
 			&i.ProductID,
 			&i.Quantity,
 			&i.Price,

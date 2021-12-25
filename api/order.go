@@ -9,7 +9,7 @@ import (
 
 type listOrdersRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+	PageSize int32 `form:"page_size" binding:"required,min=1,max=20"`
 }
 
 func (server *Server) listOrders(ctx *gin.Context) {
@@ -31,9 +31,9 @@ func (server *Server) listOrders(ctx *gin.Context) {
 }
 
 type createOrderRequest struct {
-	UserID    int64 `json:"user_id" binding:"required"`
-	ProductID int64 `json:"product_id" binding:"required"`
-	Quantity  int64 `json:"quantity" binding:"required,min=1"`
+	Username  string `json:"username" binding:"required"`
+	ProductID int64  `json:"product_id" binding:"required"`
+	Quantity  int64  `json:"quantity" binding:"required,min=1"`
 }
 
 func (server *Server) createOrder(ctx *gin.Context) {
@@ -42,7 +42,7 @@ func (server *Server) createOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	user, err := server.store.GetUser(ctx, req.UserID)
+	user, err := server.store.GetUser(ctx, req.Username)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

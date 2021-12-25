@@ -42,7 +42,7 @@ func TestOrderTx(t *testing.T) {
 		// Check user
 		resultUser := result.User
 		require.NotEmpty(t, user)
-		require.Equal(t, user.ID, resultUser.ID)
+		require.Equal(t, user.Username, resultUser.Username)
 		// Check product
 		resultProduct := result.Product
 		require.NotEmpty(t, resultProduct)
@@ -50,7 +50,7 @@ func TestOrderTx(t *testing.T) {
 		// Check order
 		order := result.Order
 		require.NotEmpty(t, order)
-		require.Equal(t, user.ID, order.UserID)
+		require.Equal(t, user.Username, order.Owner)
 		require.Equal(t, product.ID, order.ProductID)
 		require.Equal(t, quantity, order.Quantity)
 		require.NotZero(t, order.ID)

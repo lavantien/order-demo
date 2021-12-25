@@ -7,8 +7,9 @@ import (
 
 func randomUser() db.User {
 	return db.User{
-		ID:             util.RandomInt(1, 1000),
-		Email:          util.RandomEmail(),
+		Username: util.RandomName(),
 		HashedPassword: util.RandomPassword(),
+		FullName: util.RandomName(),
+		Email:          util.RandomEmail(),
 	}
 }

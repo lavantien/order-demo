@@ -15,7 +15,7 @@ func createRandomOrder(t *testing.T) Order {
 	quantity := util.RandomQuantity()
 	price := product.Cost * quantity
 	arg := CreateOrderParams{
-		UserID:    user.ID,
+		Owner:    user.Username,
 		ProductID: product.ID,
 		Quantity:  quantity,
 		Price:     price,
@@ -23,7 +23,7 @@ func createRandomOrder(t *testing.T) Order {
 	order, err := testQueries.CreateOrder(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, order)
-	require.Equal(t, arg.UserID, order.UserID)
+	require.Equal(t, arg.Owner, order.Owner)
 	require.Equal(t, arg.ProductID, order.ProductID)
 	require.Equal(t, arg.Quantity, order.Quantity)
 	require.Equal(t, arg.Price, order.Price)
@@ -42,7 +42,7 @@ func TestGetOrder(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, order2)
 	require.Equal(t, order1.ID, order2.ID)
-	require.Equal(t, order1.UserID, order2.UserID)
+	require.Equal(t, order1.Owner, order2.Owner)
 	require.Equal(t, order1.ProductID, order2.ProductID)
 	require.Equal(t, order1.Quantity, order2.Quantity)
 	require.Equal(t, order1.Price, order2.Price)

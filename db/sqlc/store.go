@@ -79,7 +79,7 @@ func (store *DBStore) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxRe
 		// Create order with calculated information
 		// log.Println(txName, "create order")
 		order, err := q.CreateOrder(ctx, CreateOrderParams{
-			UserID:    arg.User.ID,
+			Owner:    arg.User.Username,
 			ProductID: arg.Product.ID,
 			Quantity:  arg.Quantity,
 			Price:     price,

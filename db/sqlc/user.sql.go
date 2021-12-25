@@ -8,51 +8,62 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, hashed_password)
-VALUES ($1, $2)
-RETURNING id, email, hashed_password, created_at
+INSERT INTO users (username, hashed_password, full_name, email)
+VALUES ($1, $2, $3, $4)
+RETURNING username, hashed_password, full_name, email, password_change_at, created_at
 `
 
 type CreateUserParams struct {
-	Email          string `json:"email"`
+	Username       string `json:"username"`
 	HashedPassword string `json:"hashed_password"`
+	FullName       string `json:"full_name"`
+	Email          string `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.HashedPassword,
+		arg.FullName,
+		arg.Email,
+	)
 	var i User
 	err := row.Scan(
-		&i.ID,
-		&i.Email,
+		&i.Username,
 		&i.HashedPassword,
+		&i.FullName,
+		&i.Email,
+		&i.PasswordChangeAt,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, email, hashed_password, created_at
+SELECT username, hashed_password, full_name, email, password_change_at, created_at
 FROM users
-WHERE id = $1
+WHERE username = $1
 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, username)
 	var i User
 	err := row.Scan(
-		&i.ID,
-		&i.Email,
+		&i.Username,
 		&i.HashedPassword,
+		&i.FullName,
+		&i.Email,
+		&i.PasswordChangeAt,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, email, hashed_password, created_at
+SELECT username, hashed_password, full_name, email, password_change_at, created_at
 FROM users
-ORDER BY id
+ORDER BY username
 LIMIT $1 OFFSET $2
 `
 
@@ -71,9 +82,11 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
+			&i.Username,
 			&i.HashedPassword,
+			&i.FullName,
+			&i.Email,
+			&i.PasswordChangeAt,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

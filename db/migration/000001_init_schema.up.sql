@@ -1,13 +1,15 @@
 CREATE TABLE "users" (
-  "id" bigserial PRIMARY KEY,
-  "email" varchar NOT NULL,
+  "username" varchar PRIMARY KEY,
   "hashed_password" varchar NOT NULL,
+  "full_name" varchar NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
+  "password_change_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "orders" (
   "id" bigserial PRIMARY KEY,
-  "user_id" bigint NOT NULL,
+  "owner" varchar NOT NULL,
   "product_id" bigint NOT NULL,
   "quantity" bigint NOT NULL,
   "price" bigint NOT NULL,
@@ -22,15 +24,17 @@ CREATE TABLE "products" (
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE "orders" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "orders" ADD FOREIGN KEY ("owner") REFERENCES "users" ("username");
 
 ALTER TABLE "orders" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 
-CREATE INDEX ON "users" ("email");
-
 CREATE INDEX ON "users" ("hashed_password");
 
-CREATE INDEX ON "orders" ("user_id");
+CREATE INDEX ON "users" ("full_name");
+
+CREATE INDEX ON "users" ("password_change_at");
+
+CREATE INDEX ON "orders" ("owner");
 
 CREATE INDEX ON "orders" ("product_id");
 

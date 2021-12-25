@@ -7,9 +7,9 @@ import (
 )
 
 type Order struct {
-	ID        int64 `json:"id"`
-	UserID    int64 `json:"user_id"`
-	ProductID int64 `json:"product_id"`
+	ID        int64  `json:"id"`
+	Owner     string `json:"owner"`
+	ProductID int64  `json:"product_id"`
 	// must be positive
 	Quantity int64 `json:"quantity"`
 	// must be positive
@@ -28,8 +28,10 @@ type Product struct {
 }
 
 type User struct {
-	ID             int64     `json:"id"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	CreatedAt      time.Time `json:"created_at"`
+	Username         string    `json:"username"`
+	HashedPassword   string    `json:"hashed_password"`
+	FullName         string    `json:"full_name"`
+	Email            string    `json:"email"`
+	PasswordChangeAt time.Time `json:"password_change_at"`
+	CreatedAt        time.Time `json:"created_at"`
 }
