@@ -17,8 +17,10 @@ func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("email", validEmail)
+		v.RegisterValidation("fullname", validFullname)
 	}
+	router.POST("/users", server.createUser)
+	router.GET("/users", server.listUsers)
 	router.GET("/products", server.listProducts)
 	router.POST("/products", server.createProduct)
 	router.POST("/products/cart/add", server.addToCart)

@@ -12,7 +12,7 @@
 - **Endpoints**:
 
 <details>
-	<summary>See details</summary>
+ <summary>See details</summary>
 
 ```bash
 # See Booting Up running and testing instructions in the section below first, and then:
@@ -156,6 +156,64 @@ curl http://localhost:8080/orders?page_id=1&page_size=5 | jq
     "created_at": "2021-12-20T19:42:26.701013Z"
   }
 ]
+
+# Rqm4.1: Create user via endpoint
+curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"username":"tien1","full_name":"Tien La","email":"tien@email.com","password":"secret"}' | jq
+# Should return
+{
+  "username": "tien1",
+  "full_name": "Tien La",
+  "email": "tien@email.com",
+  "password_change_at": "0001-01-01T00:00:00Z",
+  "created_at": "2021-12-25T12:23:04.82391Z"
+}
+
+# Rqm4.2: List users
+curl http://localhost:8080/users?page_id=1&page_size=5 | jq
+# Should return
+[
+  {
+    "username": "adumqa",
+    "hashed_password": "$2a$10$uLLL/MJ5v2QhJFNrnviUDuPjZrj9JBBIZvGhUSHMQN6gV7Ao0DNke",
+    "full_name": "fglkbw",
+    "email": "fldwtr@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-25T22:41:26.314508Z"
+  },
+  {
+    "username": "bjqyze",
+    "hashed_password": "$2a$10$VSKxzf8tRl5Rfdz2.QOuuetIWdFvLhb5CfsJpMjf3MVm3cI0bcdG.",
+    "full_name": "xadprw",
+    "email": "qjaxmw@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-25T22:41:27.330422Z"
+  },
+  {
+    "username": "dhmxjk",
+    "hashed_password": "$2a$10$Ep.SYe6VSshu8gsN41evj.jvjBkqwB1Y4SqY/SpCKUyf/JL4D633a",
+    "full_name": "unfbtr",
+    "email": "duozjr@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-25T22:41:27.019427Z"
+  },
+  {
+    "username": "dpcelz",
+    "hashed_password": "$2a$10$sR7wzk9NEuBrNSNEXX4S/ekS7nqLI3afDdpbEbaUrO9QiFF3nDjgW",
+    "full_name": "isnjcf",
+    "email": "gjmgxi@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-25T22:41:26.862502Z"
+  },
+  {
+    "username": "eyzcfe",
+    "hashed_password": "$2a$10$UYy4Bx6/FGCUs4nROOKwYOtPWzYK0CtbJQZA208g/ll8NitVQ.6Dy",
+    "full_name": "baewxb",
+    "email": "pvpwyw@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-25T22:41:27.17524Z"
+  }
+]
+
 ```
 
 </details>

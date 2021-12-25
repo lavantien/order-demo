@@ -22,7 +22,7 @@ func TestListOrdersAPI(t *testing.T) {
 	n := 5
 	orders := make([]db.Order, n)
 	for i := 0; i < n; i++ {
-		orders[i] = randomOrder()
+		orders[i] = randomOrder(t)
 	}
 	type Query struct {
 		pageID   int
@@ -115,8 +115,8 @@ func TestListOrdersAPI(t *testing.T) {
 	}
 }
 
-func randomOrder() db.Order {
-	user := randomUser()
+func randomOrder(t *testing.T) db.Order {
+	user, _ := randomUser(t)
 	product := randomProduct()
 	quantity := util.RandomQuantity()
 	price := product.Cost * quantity
@@ -148,7 +148,7 @@ func requireBodyMatchOrders(t *testing.T, body *bytes.Buffer, orders []db.Order)
 }
 
 func TestCreateOrderAPI(t *testing.T) {
-	user := randomUser()
+	user, _ := randomUser(t)
 	product := randomProduct()
 	quantity := util.RandomQuantity()
 	// correctPrice := product.Cost * quantity
