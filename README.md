@@ -49,7 +49,7 @@ authRoutes.POST("/orders", server.createOrder)
 <details>
 	<summary>See details</summary>
 
-See Booting Up running and testing instructions in the section below first (`make postgres` -> `make createdb` -> `make migrateup` -> `make test` -> `make server`) to populate admin account and products data ..., (`make migratedown` to clean the db), and then continue:
+See **Booting Up** running and testing instructions in the section below first, and then continue:
 
 ![Server running](/resources/readme/server-running.png "Server running")
 
@@ -253,9 +253,13 @@ curl http://localhost:8080/orders?page_id=1&page_size=5 -H "Authorization: Beare
 
 ## Booting Up
 
+### Non-docker way
+
 - Spin up a PostgreSQL instance, run createdb and migrateup:
 
 ```bash
+make network
+
 make postgres
 
 make createdb
@@ -279,6 +283,27 @@ make test
 make server
 
 # make migratedown
+```
+
+### Docker way
+
+```bash
+make network
+
+make postgres
+
+make createdb
+
+make migrate up
+
+make test
+
+make order-demo
+
+# Rebuild server image
+# make build
+
+# make clean
 ```
 
 ## Development Infrastructure Setup

@@ -1,7 +1,10 @@
 makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+network:
+	docker network create order-network
+
 postgres:
-	- docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:alpine
+	- docker run --name postgres --network order-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:alpine
 	- docker start postgres
 
 createdb:
@@ -28,4 +31,14 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go order-demo/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock
+build:
+	docker build -t order-demo:latest .
+
+clean:
+	- docker stop order-demo && docker rm order-demo
+
+order-demo:
+	- docker run --name order-demo --network order-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres:5432/order_demo?sslmode=disable" -d order-demo:latest
+	- docker start order-demo
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock build clean order-demo
