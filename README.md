@@ -14,7 +14,7 @@
 1. [X] Cleanly structured and CI integration
 2. [X] Well-documented
 3. [X] Well-tested
-4. [ ] Containerized
+4. [X] Containerized
 
 ### **Authorization Rules**
 
@@ -304,6 +304,16 @@ make order-demo
 # make build
 
 # make clean
+```
+
+### Docker Compose way
+
+```bash
+docker-compose up
+
+# docker-compose down
+
+# docker rmi order-demo_api
 ```
 
 ## Development Infrastructure Setup
