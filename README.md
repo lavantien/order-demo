@@ -48,11 +48,7 @@ authRoutes.POST("/orders", server.createOrder)
 
 See Booting Up running and testing instructions in the section below first (`make postgres` -> `make createdb` -> `make migrateup` -> `make test` -> `make server`) to populate admin account and products data ..., (`make migratedown` to clean the db), and then continue:
 
-### Rqm4.3: User login (with admin account if want full access)
-
-After logged-in, copy the `access_token` to the `TOKEN` variable to be use in appropriated endpoints' `-H 'Authorization: Bearer ...'`. Or use Postman/Insomnia/vscode-rest, ...
-
-If having the error `token has expired`, log in again
+![Server running](/resources/readme/server-running.png "Server running")
 
 ### Rqm4.1: Create user via endpoint
 
@@ -79,6 +75,10 @@ curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{
 ```
 
 ### Rqm4.3: User log in
+
+After logged-in, copy the `access_token` to the `TOKEN` variable to be use in appropriated endpoints' `-H 'Authorization: Bearer ...'`. Or use Postman/Insomnia/vscode-rest, ...
+
+If having the error `token has expired`, log in again
 
 ```bash
 curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
