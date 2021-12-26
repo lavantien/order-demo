@@ -2,12 +2,16 @@
 
 ![ci-test](https://github.com/lavantien/order-demo/actions/workflows/ci.yml/badge.svg?branch=main)
 
-## Requirements
+## 4 Requirements and 4 Bonuses
 
 1. [X] View list of products
 2. [X] Add/Remove product from cart
 3. [X] Create new order with payment
 4. [X] Users can login, sign up
+5. [X] Cleanly structured and CI integration
+6. [X] Well-documented
+7. [X] Well-tested
+8. [ ] Containerized
 
 ### **Authorization Rules**
 
@@ -42,7 +46,7 @@ authRoutes.POST("/orders", server.createOrder)
 <details>
 	<summary>See details</summary>
 
-See Booting Up running and testing instructions in the section below first (`make postgres` -> `make migrateup` -> `make test` -> `make server`) to populate admin account and products data ..., (`make migratedown` to clean the db), and then continue:
+See Booting Up running and testing instructions in the section below first (`make postgres` -> `make createdb` -> `make migrateup` -> `make test` -> `make server`) to populate admin account and products data ..., (`make migratedown` to clean the db), and then continue:
 
 ### Rqm4.3: User login (with admin account if want full access)
 
@@ -246,9 +250,11 @@ curl http://localhost:8080/orders?page_id=1&page_size=5 -H "Authorization: Beare
 
 ## Booting Up
 
-- Run createdb and migrateup:
+- Spin up a PostgreSQL instance, run createdb and migrateup:
 
 ```bash
+make postgres
+
 make createdb
 
 make migrateup
@@ -257,9 +263,9 @@ make migrateup
 - Run test:
 
 ```bash
-go get github.com/golang/mock/mockgen/model
+# go get github.com/golang/mock/mockgen/model
 
-make mock
+# make mock
 
 make test
 ```
@@ -268,6 +274,8 @@ make test
 
 ```bash
 make server
+
+# make migratedown
 ```
 
 ## Development Infrastructure Setup
