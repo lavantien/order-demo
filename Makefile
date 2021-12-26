@@ -36,6 +36,8 @@ build:
 
 clean:
 	- docker stop order-demo && docker rm order-demo
+	- docker stop postgres && docker rm postgres
+	- docker rmi order-demo_api
 
 order-demo:
 	- docker run --name order-demo --network order-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres:5432/order_demo?sslmode=disable" -d order-demo:latest
