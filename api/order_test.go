@@ -99,7 +99,7 @@ func TestListOrdersAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := "/orders"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -219,7 +219,7 @@ func TestCreateOrderAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			// Marshal body data to JSON
 			data, err := json.Marshal(tc.body)

@@ -9,15 +9,16 @@
 3. [X] Create new order with payment
 4. [ ] Users can login, sign up
 
-- **Endpoints**:
+### **API Endpoints**
 
 <details>
  <summary>See details</summary>
 
-```bash
-# See Booting Up running and testing instructions in the section below first, and then:
+See Booting Up running and testing instructions in the section below first, and then
 
-# Rqm1: View list of products
+### Rqm1: View list of products
+
+```bash
 curl http://localhost:8080/products?page_id=1&page_size=5 | jq
 # Should return
 [
@@ -57,8 +58,11 @@ curl http://localhost:8080/products?page_id=1&page_size=5 | jq
     "created_at": "2021-12-20T19:25:16.164919Z"
   }
 ]
+```
 
-# Rqm2.1: Add product from cart
+### Rqm2.1: Add product to cart
+
+```bash
 curl http://localhost:8080/products/cart/add -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
 # Should return
 {
@@ -70,8 +74,11 @@ curl http://localhost:8080/products/cart/add -H 'Content-Type: application/json'
     "created_at": "2021-12-20T19:25:16.15668Z"
   }
 }
+```
 
-# Rqm2.1: Add product from cart
+### Rqm2.2: Remove product from cart
+
+```bash
 curl http://localhost:8080/products/cart/remove -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
 # Should return
 {
@@ -83,8 +90,11 @@ curl http://localhost:8080/products/cart/remove -H 'Content-Type: application/js
     "created_at": "2021-12-20T19:25:16.15668Z"
   }
 }
+```
 
-# Rqm3.1: Create new order with payment
+### Rqm3.1: Create new order with payment
+
+```bash
 curl http://localhost:8080/orders -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
 # Should return
 {
@@ -110,8 +120,11 @@ curl http://localhost:8080/orders -H 'Content-Type: application/json' -d '{"user
     "created_at": "2021-12-22T19:31:52.272728Z"
   }
 }
+```
 
-# Rqm3.2: Check the result
+### Rqm3.2: Check the result
+
+```bash
 curl http://localhost:8080/orders?page_id=1&page_size=5 | jq
 # Should return
 [
@@ -156,8 +169,11 @@ curl http://localhost:8080/orders?page_id=1&page_size=5 | jq
     "created_at": "2021-12-20T19:42:26.701013Z"
   }
 ]
+```
 
-# Rqm4.1: Create user via endpoint
+### Rqm4.1: Create user via endpoint
+
+```bash
 curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"username":"tien1","full_name":"Tien La","email":"tien@email.com","password":"secret"}' | jq
 # Should return
 {
@@ -167,8 +183,11 @@ curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"usern
   "password_change_at": "0001-01-01T00:00:00Z",
   "created_at": "2021-12-25T12:23:04.82391Z"
 }
+```
 
-# Rqm4.2: List users
+### Rqm4.2: List users
+
+```bash
 curl http://localhost:8080/users?page_id=1&page_size=5 | jq
 # Should return
 [
@@ -213,7 +232,33 @@ curl http://localhost:8080/users?page_id=1&page_size=5 | jq
     "created_at": "2021-12-25T22:41:27.17524Z"
   }
 ]
+```
 
+### Rqm4.3: User login
+
+```bash
+curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
+# Should return
+{
+  "access_token": "v2.local.fXVcYzYD0Zhm9UxoUtxlxER7NtkuJ8RY0_-NxvrUY8lizSR-yIbX1KWohCEOa0QMrxexozDgLV9LeNL681RIOkcz6LJZZivn4cBbWMw4TY0MEmPs_k0wbe2o4Z5COlLeE0SKLR3UcEudAyoXUt0RYbmeeA80SEv2OzkyPcd3N83czo2qe3y1Lu45uJdACOG2hwgn0_wKmq82R1pUJz5SnCUnE_6h3G1IKnt3Ic-BfkFSx2Q89Z1jKFH1jwPxyml3gUamvwIydcBszrF6FQ.bnVsbA",
+  "user": {
+    "username": "tien1",
+    "full_name": "Tien La",
+    "email": "tien@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-26T13:08:51.243974Z"
+  }
+}
+```
+
+### Rqm4.4: User login with wrong password
+
+```bash
+curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"abc123"}' | jq
+# Should return (401)
+{
+  "error": "crypto/bcrypt: hashedPassword is not the hash of the given password"
+}
 ```
 
 </details>

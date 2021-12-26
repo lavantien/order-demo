@@ -99,7 +99,7 @@ func TestListProductsAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := "/products"
 			request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -220,7 +220,7 @@ func TestCreateProductAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			// Marshal body data to JSON
 			data, err := json.Marshal(tc.body)
