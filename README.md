@@ -229,6 +229,7 @@ curl http://localhost:8080/users?page_id=1&page_size=5 | jq
 - **PostgreSQL**: *RDBMS of choice because of faster read due to its indexing model and safer transaction with better isolation levels handling*
 - **Gin**: *Fast and have respect for native net/http API*
 - **Paseto Token**: *Better choice than JWT because of enforcing better cryptographic standards and debloated of useless information*
+- **JWT Token**: *Also implemented to demonstrate the decoupility*
 - **Golang-Migrate**: *Efficient schema generating, up/down migrating*
 - **GoMock**: *Generates mocks of about anything*
 - **Docker** + **Docker-Compose**: *Containerization, what else to say ...*
