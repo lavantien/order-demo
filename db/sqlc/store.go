@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Store provides all functions to execute db queries and transactions
@@ -50,10 +51,18 @@ type OrderTxParams struct {
 	Quantity int64   `json:"quantity"`
 }
 
+type userResponse struct {
+	Username         string    `json:"username"`
+	FullName         string    `json:"full_name"`
+	Email            string    `json:"email"`
+	PasswordChangeAt time.Time `json:"password_change_at"`
+	CreatedAt        time.Time `json:"created_at"`
+}
+
 type OrderTxResult struct {
-	User    User    `json:"user"`
-	Product Product `json:"product"`
-	Order   Order   `json:"order"`
+	User    userResponse `json:"user"`
+	Product Product      `json:"product"`
+	Order   Order        `json:"order"`
 }
 
 // var txKey = struct{}{}
@@ -65,10 +74,17 @@ func (store *DBStore) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxRe
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 		// txName := ctx.Value(txKey)
+		user := userResponse{
+			Username:         arg.User.Username,
+			FullName:         arg.User.FullName,
+			Email:            arg.User.Email,
+			PasswordChangeAt: arg.User.PasswordChangeAt,
+			CreatedAt:        arg.User.CreatedAt,
+		}
 		// Check if buyer's quantity exceed quantity in warehouse
 		if arg.Quantity > arg.Product.Quantity {
 			result = OrderTxResult{
-				User:    arg.User,
+				User:    user,
 				Product: arg.Product,
 				Order:   Order{},
 			}
@@ -79,7 +95,7 @@ func (store *DBStore) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxRe
 		// Create order with calculated information
 		// log.Println(txName, "create order")
 		order, err := q.CreateOrder(ctx, CreateOrderParams{
-			Owner:    arg.User.Username,
+			Owner:     user.Username,
 			ProductID: arg.Product.ID,
 			Quantity:  arg.Quantity,
 			Price:     price,
@@ -90,7 +106,7 @@ func (store *DBStore) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxRe
 		// Adjust product quantity and form the result
 		product, err := updateProductQuantity(ctx, q, arg.Product, arg.Quantity)
 		result = OrderTxResult{
-			User:    arg.User,
+			User:    user,
 			Product: product,
 			Order:   order,
 		}

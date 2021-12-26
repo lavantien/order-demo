@@ -10,8 +10,10 @@ import (
 	"net/http/httptest"
 	mockdb "order-demo/db/mock"
 	db "order-demo/db/sqlc"
+	"order-demo/token"
 	"order-demo/util"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -143,23 +145,28 @@ func requireBodyMatchProducts(t *testing.T, body *bytes.Buffer, products []db.Pr
 }
 
 func TestCreateProductAPI(t *testing.T) {
+	user, _ := randomUser(t)
 	product := randomProduct()
 	testCases := []struct {
 		name          string
 		body          gin.H
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
 			body: gin.H{
-				"name":     product.Name,
+				"name":     user.Username,
 				"cost":     product.Cost,
 				"quantity": product.Quantity,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.CreateProductParams{
-					Name:     product.Name,
+					Name:     user.Username,
 					Cost:     product.Cost,
 					Quantity: product.Quantity,
 				}
@@ -171,11 +178,30 @@ func TestCreateProductAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "InternalError",
+			name: "NoAuthorization",
 			body: gin.H{
-				"name":     product.Name,
+				"name":     user.Username,
 				"cost":     product.Cost,
 				"quantity": product.Quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().CreateProduct(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "InternalError",
+			body: gin.H{
+				"name":     user.Username,
+				"cost":     product.Cost,
+				"quantity": product.Quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().CreateProduct(gomock.Any(), gomock.Any()).Times(1).Return(db.Product{}, sql.ErrConnDone)
@@ -187,9 +213,12 @@ func TestCreateProductAPI(t *testing.T) {
 		{
 			name: "InvalidQuantity",
 			body: gin.H{
-				"name":     product.Name,
+				"name":     user.Username,
 				"cost":     product.Cost,
 				"quantity": -1,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().CreateProduct(gomock.Any(), gomock.Any()).Times(0)
@@ -201,9 +230,12 @@ func TestCreateProductAPI(t *testing.T) {
 		{
 			name: "InvalidCost",
 			body: gin.H{
-				"name":     product.Name,
+				"name":     user.Username,
 				"cost":     -1,
 				"quantity": product.Quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().CreateProduct(gomock.Any(), gomock.Any()).Times(0)
@@ -228,6 +260,7 @@ func TestCreateProductAPI(t *testing.T) {
 			url := "/products"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})

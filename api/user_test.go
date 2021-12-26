@@ -10,9 +10,11 @@ import (
 	"net/http/httptest"
 	mockdb "order-demo/db/mock"
 	db "order-demo/db/sqlc"
+	"order-demo/token"
 	"order-demo/util"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -39,6 +41,8 @@ func TestListUsersAPI(t *testing.T) {
 	for i := 0; i < n; i++ {
 		users[i], _ = randomUser(t)
 	}
+	user := users[0]
+	singleUsers := []db.User{user}
 	type Query struct {
 		pageID   int
 		pageSize int
@@ -46,14 +50,18 @@ func TestListUsersAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		query         Query
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name: "OK",
+			name: "OKAdmin",
 			query: Query{
 				pageID:   1,
 				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "admin", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.ListUsersParams{
@@ -68,10 +76,45 @@ func TestListUsersAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "InternalError",
+			name: "OK",
 			query: Query{
 				pageID:   1,
 				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchUsers(t, recorder.Body, singleUsers)
+			},
+		},
+		{
+			name: "NoAuthorization",
+			query: Query{
+				pageID:   1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().ListUsers(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "InternalErrorAdmin",
+			query: Query{
+				pageID:   1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "admin", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().ListUsers(gomock.Any(), gomock.Any()).Times(1).Return([]db.User{}, sql.ErrConnDone)
@@ -86,8 +129,11 @@ func TestListUsersAPI(t *testing.T) {
 				pageID:   -1,
 				pageSize: n,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().ListUsers(gomock.Any(), gomock.Any()).Times(0)
+				store.EXPECT().GetUser(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -99,8 +145,11 @@ func TestListUsersAPI(t *testing.T) {
 				pageID:   1,
 				pageSize: 100000,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().ListUsers(gomock.Any(), gomock.Any()).Times(0)
+				store.EXPECT().GetUser(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -124,6 +173,7 @@ func TestListUsersAPI(t *testing.T) {
 			q.Add("page_id", fmt.Sprintf("%d", tc.query.pageID))
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.pageSize))
 			request.URL.RawQuery = q.Encode()
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})
@@ -139,16 +189,19 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 	require.Equal(t, gotUser.Username, user.Username)
 	require.Equal(t, gotUser.FullName, user.FullName)
 	require.Equal(t, gotUser.Email, user.Email)
-	require.Empty(t, gotUser.HashedPassword)
 }
 
 func requireBodyMatchUsers(t *testing.T, body *bytes.Buffer, users []db.User) {
 	data, err := ioutil.ReadAll(body)
 	require.NoError(t, err)
-	var gotUsers []db.User
+	var gotUsers []userResponse
 	err = json.Unmarshal(data, &gotUsers)
 	require.NoError(t, err)
-	require.Equal(t, users, gotUsers)
+	for i, gotUser := range gotUsers {
+		require.Equal(t, gotUser.Username, users[i].Username)
+		require.Equal(t, gotUser.FullName, users[i].FullName)
+		require.Equal(t, gotUser.Email, users[i].Email)
+	}
 }
 
 type eqCreateUserParamsMatcher struct {

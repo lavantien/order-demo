@@ -10,8 +10,10 @@ import (
 	"net/http/httptest"
 	mockdb "order-demo/db/mock"
 	db "order-demo/db/sqlc"
+	"order-demo/token"
 	"order-demo/util"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -19,10 +21,11 @@ import (
 )
 
 func TestListOrdersAPI(t *testing.T) {
+	user, _ := randomUser(t)
 	n := 5
 	orders := make([]db.Order, n)
 	for i := 0; i < n; i++ {
-		orders[i] = randomOrder(t)
+		orders[i] = randomOrder(user.Username)
 	}
 	type Query struct {
 		pageID   int
@@ -31,6 +34,7 @@ func TestListOrdersAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		query         Query
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
@@ -40,16 +44,35 @@ func TestListOrdersAPI(t *testing.T) {
 				pageID:   1,
 				pageSize: n,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.ListOrdersParams{
+				arg := db.ListOrdersByOwnerParams{
 					Limit:  int32(n),
 					Offset: 0,
+					Owner:  user.Username,
 				}
-				store.EXPECT().ListOrders(gomock.Any(), gomock.Eq(arg)).Times(1).Return(orders, nil)
+				store.EXPECT().ListOrdersByOwner(gomock.Any(), gomock.Eq(arg)).Times(1).Return(orders, nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				requireBodyMatchOrders(t, recorder.Body, orders)
+			},
+		},
+		{
+			name: "NoAuthorization",
+			query: Query{
+				pageID:   1,
+				pageSize: n,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().ListOrdersByOwner(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
@@ -58,8 +81,11 @@ func TestListOrdersAPI(t *testing.T) {
 				pageID:   1,
 				pageSize: n,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().ListOrders(gomock.Any(), gomock.Any()).Times(1).Return([]db.Order{}, sql.ErrConnDone)
+				store.EXPECT().ListOrdersByOwner(gomock.Any(), gomock.Any()).Times(1).Return([]db.Order{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -71,8 +97,11 @@ func TestListOrdersAPI(t *testing.T) {
 				pageID:   -1,
 				pageSize: n,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().ListOrders(gomock.Any(), gomock.Any()).Times(0)
+				store.EXPECT().ListOrdersByOwner(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -84,8 +113,11 @@ func TestListOrdersAPI(t *testing.T) {
 				pageID:   1,
 				pageSize: 100000,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().ListOrders(gomock.Any(), gomock.Any()).Times(0)
+				store.EXPECT().ListOrdersByOwner(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -109,20 +141,20 @@ func TestListOrdersAPI(t *testing.T) {
 			q.Add("page_id", fmt.Sprintf("%d", tc.query.pageID))
 			q.Add("page_size", fmt.Sprintf("%d", tc.query.pageSize))
 			request.URL.RawQuery = q.Encode()
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})
 	}
 }
 
-func randomOrder(t *testing.T) db.Order {
-	user, _ := randomUser(t)
+func randomOrder(owner string) db.Order {
 	product := randomProduct()
 	quantity := util.RandomQuantity()
 	price := product.Cost * quantity
 	return db.Order{
 		ID:        util.RandomInt(1, 1000),
-		Owner:     user.Username,
+		Owner:     owner,
 		ProductID: product.ID,
 		Quantity:  quantity,
 		Price:     price,
@@ -155,6 +187,7 @@ func TestCreateOrderAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
@@ -164,6 +197,9 @@ func TestCreateOrderAPI(t *testing.T) {
 				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
@@ -180,11 +216,30 @@ func TestCreateOrderAPI(t *testing.T) {
 			},
 		},
 		{
+			name: "NoAuthorization",
+			body: gin.H{
+				"username":   user.Username,
+				"product_id": product.ID,
+				"quantity":   quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().OrderTx(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name: "NegativeQuantity",
 			body: gin.H{
 				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   -1,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().GetUser(gomock.Any(), gomock.Any()).Times(0)
@@ -201,6 +256,9 @@ func TestCreateOrderAPI(t *testing.T) {
 				"username":   user.Username,
 				"product_id": product.ID,
 				"quantity":   quantity,
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().GetUser(gomock.Any(), gomock.Eq(user.Username)).Times(1).Return(user, nil)
@@ -227,6 +285,7 @@ func TestCreateOrderAPI(t *testing.T) {
 			url := "/orders"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
 			require.NoError(t, err)
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})

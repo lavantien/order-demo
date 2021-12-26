@@ -7,169 +7,48 @@
 1. [X] View list of products
 2. [X] Add/Remove product from cart
 3. [X] Create new order with payment
-4. [ ] Users can login, sign up
+4. [X] Users can login, sign up
+
+### **Authorization Rules**
+
+<details>
+	<summary>See details</summary>
+
+```go
+// From the server's routes, add authentication middleware, using Paseto Token with local symmetric encryption
+tokenMaker, _ := token.NewPasetoMaker(config.TokenSymmetricKey)
+authRoutes := router.Group("/").Use(authMiddleware(tokenMaker))
+// These 6 endpoints need authorization, implements in their handlers repsectively
+authRoutes.GET("/users", server.listUsers)
+authRoutes.POST("/products", server.createProduct)
+authRoutes.POST("/products/cart/add", server.addToCart)
+authRoutes.POST("/products/cart/remove", server.removeFromCart)
+authRoutes.GET("/orders", server.listOrders)
+authRoutes.POST("/orders", server.createOrder)
+```
+
+0. [X] An admin user `{"username":"admin",password:"secret"}` have all the powers, is created upon migrate up, log in as admin to test all of the endpoints
+1. [X] A logged-in user can only view their own user's details
+2. [X] A logged-in user can create a product
+3. [X] A logged-in user can add a product to cart
+4. [X] A logged-in user can remove a product from card
+5. [X] A logged-in user can create an order
+6. [X] A logged-in user can only view a the orders that they've made
+
+</details>
 
 ### **API Endpoints**
 
 <details>
- <summary>See details</summary>
+	<summary>See details</summary>
 
-See Booting Up running and testing instructions in the section below first, and then
+See Booting Up running and testing instructions in the section below first (`make postgres` -> `make migrateup` -> `make test` -> `make server`) to populate admin account and products data ..., (`make migratedown` to clean the db), and then continue:
 
-### Rqm1: View list of products
+### Rqm4.3: User login (with admin account if want full access)
 
-```bash
-curl http://localhost:8080/products?page_id=1&page_size=5 | jq
-# Should return
-[
-  {
-    "id": 1,
-    "name": "lxhoak",
-    "cost": 445,
-    "quantity": 6,
-    "created_at": "2021-12-20T19:25:16.15668Z"
-  },
-  {
-    "id": 2,
-    "name": "yyfxbi",
-    "cost": 777,
-    "quantity": 10,
-    "created_at": "2021-12-20T19:25:16.159625Z"
-  },
-  {
-    "id": 3,
-    "name": "vyloqc",
-    "cost": 975,
-    "quantity": 1,
-    "created_at": "2021-12-20T19:25:16.162256Z"
-  },
-  {
-    "id": 4,
-    "name": "csibko",
-    "cost": 271,
-    "quantity": 6,
-    "created_at": "2021-12-20T19:25:16.163474Z"
-  },
-  {
-    "id": 5,
-    "name": "aymlpf",
-    "cost": 93,
-    "quantity": 3,
-    "created_at": "2021-12-20T19:25:16.164919Z"
-  }
-]
-```
+After logged-in, copy the `access_token` to the `TOKEN` variable to be use in appropriated endpoints' `-H 'Authorization: Bearer ...'`. Or use Postman/Insomnia/vscode-rest, ...
 
-### Rqm2.1: Add product to cart
-
-```bash
-curl http://localhost:8080/products/cart/add -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
-# Should return
-{
-  "product": {
-    "id": 1,
-    "name": "lxhoak",
-    "cost": 445,
-    "quantity": 4,
-    "created_at": "2021-12-20T19:25:16.15668Z"
-  }
-}
-```
-
-### Rqm2.2: Remove product from cart
-
-```bash
-curl http://localhost:8080/products/cart/remove -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
-# Should return
-{
-  "product": {
-    "id": 1,
-    "name": "lxhoak",
-    "cost": 445,
-    "quantity": 8,
-    "created_at": "2021-12-20T19:25:16.15668Z"
-  }
-}
-```
-
-### Rqm3.1: Create new order with payment
-
-```bash
-curl http://localhost:8080/orders -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
-# Should return
-{
-  "user": {
-    "id": 1,
-    "email": "dhksfo@email.com",
-    "hashed_password": "lyxceaqfnueo",
-    "created_at": "2021-12-20T19:32:33.096859Z"
-  },
-  "product": {
-    "id": 1,
-    "name": "lxhoak",
-    "cost": 445,
-    "quantity": 4,
-    "created_at": "2021-12-20T19:25:16.15668Z"
-  },
-  "order": {
-    "id": 96,
-    "user_id": 1,
-    "product_id": 1,
-    "quantity": 2,
-    "price": 890,
-    "created_at": "2021-12-22T19:31:52.272728Z"
-  }
-}
-```
-
-### Rqm3.2: Check the result
-
-```bash
-curl http://localhost:8080/orders?page_id=1&page_size=5 | jq
-# Should return
-[
-  {
-    "id": 1,
-    "user_id": 13,
-    "product_id": 37,
-    "quantity": 9,
-    "price": 1962,
-    "created_at": "2021-12-20T19:42:26.68327Z"
-  },
-  {
-    "id": 2,
-    "user_id": 14,
-    "product_id": 38,
-    "quantity": 4,
-    "price": 1124,
-    "created_at": "2021-12-20T19:42:26.688983Z"
-  },
-  {
-    "id": 3,
-    "user_id": 15,
-    "product_id": 39,
-    "quantity": 0,
-    "price": 0,
-    "created_at": "2021-12-20T19:42:26.693553Z"
-  },
-  {
-    "id": 4,
-    "user_id": 16,
-    "product_id": 40,
-    "quantity": 3,
-    "price": 1578,
-    "created_at": "2021-12-20T19:42:26.697026Z"
-  },
-  {
-    "id": 5,
-    "user_id": 17,
-    "product_id": 41,
-    "quantity": 5,
-    "price": 3525,
-    "created_at": "2021-12-20T19:42:26.701013Z"
-  }
-]
-```
+If having the error `token has expired`, log in again
 
 ### Rqm4.1: Create user via endpoint
 
@@ -181,77 +60,11 @@ curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"usern
   "full_name": "Tien La",
   "email": "tien@email.com",
   "password_change_at": "0001-01-01T00:00:00Z",
-  "created_at": "2021-12-25T12:23:04.82391Z"
+  "created_at": "2021-12-26T18:24:12.73219Z"
 }
 ```
 
-### Rqm4.2: List users
-
-```bash
-curl http://localhost:8080/users?page_id=1&page_size=5 | jq
-# Should return
-[
-  {
-    "username": "adumqa",
-    "hashed_password": "$2a$10$uLLL/MJ5v2QhJFNrnviUDuPjZrj9JBBIZvGhUSHMQN6gV7Ao0DNke",
-    "full_name": "fglkbw",
-    "email": "fldwtr@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-25T22:41:26.314508Z"
-  },
-  {
-    "username": "bjqyze",
-    "hashed_password": "$2a$10$VSKxzf8tRl5Rfdz2.QOuuetIWdFvLhb5CfsJpMjf3MVm3cI0bcdG.",
-    "full_name": "xadprw",
-    "email": "qjaxmw@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-25T22:41:27.330422Z"
-  },
-  {
-    "username": "dhmxjk",
-    "hashed_password": "$2a$10$Ep.SYe6VSshu8gsN41evj.jvjBkqwB1Y4SqY/SpCKUyf/JL4D633a",
-    "full_name": "unfbtr",
-    "email": "duozjr@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-25T22:41:27.019427Z"
-  },
-  {
-    "username": "dpcelz",
-    "hashed_password": "$2a$10$sR7wzk9NEuBrNSNEXX4S/ekS7nqLI3afDdpbEbaUrO9QiFF3nDjgW",
-    "full_name": "isnjcf",
-    "email": "gjmgxi@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-25T22:41:26.862502Z"
-  },
-  {
-    "username": "eyzcfe",
-    "hashed_password": "$2a$10$UYy4Bx6/FGCUs4nROOKwYOtPWzYK0CtbJQZA208g/ll8NitVQ.6Dy",
-    "full_name": "baewxb",
-    "email": "pvpwyw@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-25T22:41:27.17524Z"
-  }
-]
-```
-
-### Rqm4.3: User login
-
-```bash
-curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
-# Should return
-{
-  "access_token": "v2.local.fXVcYzYD0Zhm9UxoUtxlxER7NtkuJ8RY0_-NxvrUY8lizSR-yIbX1KWohCEOa0QMrxexozDgLV9LeNL681RIOkcz6LJZZivn4cBbWMw4TY0MEmPs_k0wbe2o4Z5COlLeE0SKLR3UcEudAyoXUt0RYbmeeA80SEv2OzkyPcd3N83czo2qe3y1Lu45uJdACOG2hwgn0_wKmq82R1pUJz5SnCUnE_6h3G1IKnt3Ic-BfkFSx2Q89Z1jKFH1jwPxyml3gUamvwIydcBszrF6FQ.bnVsbA",
-  "user": {
-    "username": "tien1",
-    "full_name": "Tien La",
-    "email": "tien@email.com",
-    "password_change_at": "0001-01-01T00:00:00Z",
-    "created_at": "2021-12-26T13:08:51.243974Z"
-  }
-}
-```
-
-### Rqm4.4: User login with wrong password
+### Rqm4.2: User login with wrong password
 
 ```bash
 curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"abc123"}' | jq
@@ -259,6 +72,152 @@ curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{
 {
   "error": "crypto/bcrypt: hashedPassword is not the hash of the given password"
 }
+```
+
+### Rqm4.3: User log in
+
+```bash
+curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
+# Should return
+{
+  "access_token": "v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMbpKMXH8ie-XTW6aKnIFgEfxZNnWXpsUl_QVTsuum1X2H_97UA0iqyP4NEG4JvWdqtrQ30HFN-BdvvXle98eUnKbCFn-28ot60kMGotwRySXJvI-LKCl04crKV31C6yjmKsj-2kPQ14d7eWM7bW8TyDm2DkPy5ZyrmrUTptk3LPLKZSCHPFDa9nfVwO_u4DcG-XZh_Nt6QB3NRTvSwVw.bnVsbA",
+  "user": {
+    "username": "tien1",
+    "full_name": "Tien La",
+    "email": "tien@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-26T18:24:12.73219Z"
+  }
+}
+
+# Set TOKEN variable
+TOKEN='v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMbpKMXH8ie-XTW6aKnIFgEfxZNnWXpsUl_QVTsuum1X2H_97UA0iqyP4NEG4JvWdqtrQ30HFN-BdvvXle98eUnKbCFn-28ot60kMGotwRySXJvI-LKCl04crKV31C6yjmKsj-2kPQ14d7eWM7bW8TyDm2DkPy5ZyrmrUTptk3LPLKZSCHPFDa9nfVwO_u4DcG-XZh_Nt6QB3NRTvSwVw.bnVsbA'
+```
+
+### Rqm4.4: List users
+
+```bash
+curl http://localhost:8080/users?page_id=1&page_size=5 -H "Authorization: Bearer $TOKEN" | jq
+# Should return
+[
+  {
+    "username": "tien1",
+    "full_name": "Tien La",
+    "email": "tien@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-26T18:24:12.73219Z"
+  }
+]
+```
+
+### Rqm1: View list of products
+
+```bash
+curl http://localhost:8080/products?page_id=1&page_size=3 | jq
+# Should return
+[
+  {
+    "id": 1,
+    "name": "ndomrf",
+    "cost": 789,
+    "quantity": 4,
+    "created_at": "2021-12-26T18:20:27.991534Z"
+  },
+  {
+    "id": 2,
+    "name": "qsuwja",
+    "cost": 913,
+    "quantity": 5,
+    "created_at": "2021-12-26T18:20:28.05339Z"
+  },
+  {
+    "id": 3,
+    "name": "jesmsw",
+    "cost": 754,
+    "quantity": 9,
+    "created_at": "2021-12-26T18:20:28.11771Z"
+  }
+]
+```
+
+### Rqm2.1: Add product to cart
+
+```bash
+curl http://localhost:8080/products/cart/add -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "product": {
+    "id": 1,
+    "name": "ndomrf",
+    "cost": 789,
+    "quantity": 2,
+    "created_at": "2021-12-26T18:20:27.991534Z"
+  }
+}
+```
+
+### Rqm2.2: Remove product from cart
+
+```bash
+curl http://localhost:8080/products/cart/remove -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "product": {
+    "id": 1,
+    "name": "ndomrf",
+    "cost": 789,
+    "quantity": 6,
+    "created_at": "2021-12-26T18:20:27.991534Z"
+  }
+}
+```
+
+### Rqm3.1: Create new order with payment
+
+```bash
+curl http://localhost:8080/orders -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
+# Should return
+{
+  "user": {
+    "username": "tien1",
+    "full_name": "Tien La",
+    "email": "tien@email.com",
+    "password_change_at": "0001-01-01T00:00:00Z",
+    "created_at": "2021-12-26T18:24:12.73219Z"
+  },
+  "product": {
+    "id": 1,
+    "name": "ndomrf",
+    "cost": 789,
+    "quantity": 2,
+    "created_at": "2021-12-26T18:20:27.991534Z"
+  },
+  "order": {
+    "id": 24,
+    "owner": "tien1",
+    "product_id": 1,
+    "quantity": 2,
+    "price": 1578,
+    "created_at": "2021-12-26T18:26:26.003027Z"
+  }
+}
+```
+
+### Rqm3.2: Check the result
+
+```bash
+curl http://localhost:8080/orders?page_id=1&page_size=5 -H "Authorization: Bearer $TOKEN" | jq
+# Should return
+[
+  {
+    "id": 24,
+    "owner": "tien1",
+    "product_id": 1,
+    "quantity": 2,
+    "price": 1578,
+    "created_at": "2021-12-26T18:26:26.003027Z"
+  }
+]
 ```
 
 </details>

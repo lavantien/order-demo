@@ -39,13 +39,16 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
-	router.GET("/users", server.listUsers)
 	router.GET("/products", server.listProducts)
-	router.POST("/products", server.createProduct)
-	router.POST("/products/cart/add", server.addToCart)
-	router.POST("/products/cart/remove", server.removeFromCart)
-	router.GET("/orders", server.listOrders)
-	router.POST("/orders", server.createOrder)
+	// Add authentication middleware, using Paseto Token
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	// These endpoints need authorization, implements in their handlers repsectively
+	authRoutes.GET("/users", server.listUsers)
+	authRoutes.POST("/products", server.createProduct)
+	authRoutes.POST("/products/cart/add", server.addToCart)
+	authRoutes.POST("/products/cart/remove", server.removeFromCart)
+	authRoutes.GET("/orders", server.listOrders)
+	authRoutes.POST("/orders", server.createOrder)
 	server.router = router
 }
 

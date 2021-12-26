@@ -20,7 +20,7 @@ sqlc:
 	docker run --rm -v $(makeFileDir):/src -w /src kjconroy/sqlc generate
 
 test:
-	go test -v -cover ./...
+	go test -v -count=1 -cover ./...
 
 server:
 	go run main.go

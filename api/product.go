@@ -3,6 +3,8 @@ package api
 import (
 	"net/http"
 	db "order-demo/db/sqlc"
+	"order-demo/token"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
@@ -42,6 +44,12 @@ func (server *Server) addToCart(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	// Enforce authorization Rule3
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.ExpiredAt.Before(time.Now()) {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(token.ErrExpiredToken))
+		return
+	}
 	product, err := server.store.GetProduct(ctx, req.ProductID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -70,6 +78,12 @@ func (server *Server) removeFromCart(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	// Enforce authorization Rule4
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.ExpiredAt.Before(time.Now()) {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(token.ErrExpiredToken))
+		return
+	}
 	product, err := server.store.GetProduct(ctx, req.ProductID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -88,9 +102,8 @@ func (server *Server) removeFromCart(ctx *gin.Context) {
 }
 
 type createProductParams struct {
-	Name     string `json:"name" binding:"required"`
-	Quantity int64  `json:"quantity" binding:"required,min=0"`
-	Cost     int64  `json:"cost" binding:"required,min=0"`
+	Quantity int64 `json:"quantity" binding:"required,min=0"`
+	Cost     int64 `json:"cost" binding:"required,min=0"`
 }
 
 func (server *Server) createProduct(ctx *gin.Context) {
@@ -99,8 +112,10 @@ func (server *Server) createProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	// Enforce authorization Rule2
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateProductParams{
-		Name:     req.Name,
+		Name:     authPayload.Username,
 		Cost:     req.Cost,
 		Quantity: req.Quantity,
 	}

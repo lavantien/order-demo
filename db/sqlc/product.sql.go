@@ -8,9 +8,9 @@ import (
 )
 
 const createProduct = `-- name: CreateProduct :one
-INSERT INTO products (name, cost, quantity)
-VALUES ($1, $2, $3)
-RETURNING id, name, cost, quantity, created_at
+INSERT INTO
+    products (name, cost, quantity)
+VALUES ($1, $2, $3) RETURNING id, name, cost, quantity, created_at
 `
 
 type CreateProductParams struct {
@@ -33,10 +33,14 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, name, cost, quantity, created_at
-FROM products
-WHERE id = $1
-LIMIT 1
+SELECT
+    id, name, cost, quantity, created_at
+FROM
+    products
+WHERE
+    id = $1
+LIMIT
+    1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
@@ -53,10 +57,16 @@ func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, name, cost, quantity, created_at
-FROM products
-ORDER BY id
-LIMIT $1 OFFSET $2
+SELECT
+    id, name, cost, quantity, created_at
+FROM
+    products
+ORDER BY
+    id
+LIMIT
+    $1
+OFFSET
+    $2
 `
 
 type ListProductsParams struct {
@@ -94,10 +104,12 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 }
 
 const updateProduct = `-- name: UpdateProduct :one
-UPDATE products
-SET quantity = $2
-WHERE id = $1
-RETURNING id, name, cost, quantity, created_at
+UPDATE
+    products
+SET
+    quantity = $2
+WHERE
+    id = $1 RETURNING id, name, cost, quantity, created_at
 `
 
 type UpdateProductParams struct {

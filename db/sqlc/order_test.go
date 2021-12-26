@@ -15,7 +15,7 @@ func createRandomOrder(t *testing.T) Order {
 	quantity := util.RandomQuantity()
 	price := product.Cost * quantity
 	arg := CreateOrderParams{
-		Owner:    user.Username,
+		Owner:     user.Username,
 		ProductID: product.ID,
 		Quantity:  quantity,
 		Price:     price,
@@ -62,5 +62,24 @@ func TestListOrders(t *testing.T) {
 	require.Len(t, orders, 5)
 	for _, order := range orders {
 		require.NotEmpty(t, order)
+	}
+}
+
+func TestListOrdersByOwner(t *testing.T) {
+	var lastOrder Order
+	for i := 0; i < 10; i++ {
+		lastOrder = createRandomOrder(t)
+	}
+	arg := ListOrdersByOwnerParams{
+		Limit:  5,
+		Offset: 0,
+		Owner:  lastOrder.Owner,
+	}
+	orders, err := testQueries.ListOrdersByOwner(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, orders)
+	for _, order := range orders {
+		require.NotEmpty(t, order)
+		require.Equal(t, lastOrder.Owner, order.Owner)
 	}
 }

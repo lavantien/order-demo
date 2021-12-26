@@ -78,3 +78,22 @@ ON COLUMN "products"."cost" IS 'must be positive';
 
 COMMENT
 ON COLUMN "products"."quantity" IS 'must be positive';
+
+-- Generate admin
+INSERT INTO
+    users (
+        username,
+        hashed_password,
+        full_name,
+        email,
+        password_change_at,
+        created_at
+    )
+VALUES (
+        'admin',
+        '$2a$10$VxkKRxRSov1e2LzNXc1aden5kkDAJEM5RF5n60HauC/zLpFhx/jfe',
+        'Admin',
+        'admin@email.com',
+        '0001-01-01 07:00:00.000',
+        '2021-12-26 22:22:49.644'
+    );

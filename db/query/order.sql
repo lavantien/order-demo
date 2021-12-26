@@ -24,3 +24,17 @@ LIMIT
     $1
 OFFSET
     $2;
+
+-- name: ListOrdersByOwner :many
+SELECT
+    *
+FROM
+    orders
+WHERE
+    owner = $3
+ORDER BY
+    id
+LIMIT
+    $1
+OFFSET
+    $2;
