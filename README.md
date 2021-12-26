@@ -8,10 +8,13 @@
 2. [X] Add/Remove product from cart
 3. [X] Create new order with payment
 4. [X] Users can login, sign up
-5. [X] Cleanly structured and CI integration
-6. [X] Well-documented
-7. [X] Well-tested
-8. [ ] Containerized
+
+----
+
+1. [X] Cleanly structured and CI integration
+2. [X] Well-documented
+3. [X] Well-tested
+4. [ ] Containerized
 
 ### **Authorization Rules**
 
@@ -401,6 +404,18 @@ go install https://github.com/spf13/viper@latest
 go install github.com/gin-gonic/gin@latest
 
 go get -u github.com/gin-gonic/gin
+```
+
+- [**Paseto**](https://github.com/o1egl/paseto):
+
+```bash
+go get -u github.com/o1egl/paseto
+```
+
+- [**JWT**](https://github.com/golang-jwt/jwt):
+
+```bash
+go get -u https://github.com/golang-jwt/jwt
 ```
 
 - [**CURL**](https://curl.se/download.html) + [**JQ**](https://stedolan.github.io/jq/) + [**Chocolatery**](https://docs.chocolatey.org/en-us/choco/setup) + [**Make**](https://community.chocolatey.org/packages/make):
