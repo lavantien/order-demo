@@ -56,7 +56,7 @@ See **Booting Up** running and testing instructions in the section below first, 
 ### Rqm4.1: Create user via endpoint
 
 ```bash
-curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"username":"tien1","full_name":"Tien La","email":"tien@email.com","password":"secret"}' | jq
+curl "http://localhost:8080/users" -H "Content-Type: application/json" -d '{"username":"tien1","full_name":"Tien La","email":"tien@email.com","password":"secret"}' | jq
 # Should return
 {
   "username": "tien1",
@@ -70,7 +70,7 @@ curl http://localhost:8080/users -H "Content-Type: application/json" -d '{"usern
 ### Rqm4.2: User login with wrong password
 
 ```bash
-curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"abc123"}' | jq
+curl "http://localhost:8080/users/login" -H "Content-Type: application/json" -d '{"username":"tien1","password":"abc123"}' | jq
 # Should return (401)
 {
   "error": "crypto/bcrypt: hashedPassword is not the hash of the given password"
@@ -84,7 +84,7 @@ After logged-in, copy the `access_token` to the `TOKEN` variable to be use in ap
 If having the error `token has expired`, log in again
 
 ```bash
-curl http://localhost:8080/users/login -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
+curl "http://localhost:8080/users/login" -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
 # Should return
 {
   "access_token": "v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMbpKMXH8ie-XTW6aKnIFgEfxZNnWXpsUl_QVTsuum1X2H_97UA0iqyP4NEG4JvWdqtrQ30HFN-BdvvXle98eUnKbCFn-28ot60kMGotwRySXJvI-LKCl04crKV31C6yjmKsj-2kPQ14d7eWM7bW8TyDm2DkPy5ZyrmrUTptk3LPLKZSCHPFDa9nfVwO_u4DcG-XZh_Nt6QB3NRTvSwVw.bnVsbA",
@@ -104,7 +104,7 @@ TOKEN='v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMb
 ### Rqm4.4: List users
 
 ```bash
-curl http://localhost:8080/users?page_id=1&page_size=5 -H "Authorization: Bearer $TOKEN" | jq
+curl "http://localhost:8080/users?page_id=1&page_size=5" -H "Authorization: Bearer $TOKEN" | jq
 # Should return
 [
   {
@@ -120,7 +120,7 @@ curl http://localhost:8080/users?page_id=1&page_size=5 -H "Authorization: Bearer
 ### Rqm1: View list of products
 
 ```bash
-curl http://localhost:8080/products?page_id=1&page_size=3 | jq
+curl "http://localhost:8080/products?page_id=1&page_size=3" | jq
 # Should return
 [
   {
@@ -150,7 +150,7 @@ curl http://localhost:8080/products?page_id=1&page_size=3 | jq
 ### Rqm2.1: Add product to cart
 
 ```bash
-curl http://localhost:8080/products/cart/add -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+curl "http://localhost:8080/products/cart/add" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
 # Should return
 {
   "product": {
@@ -166,7 +166,7 @@ curl http://localhost:8080/products/cart/add -H "Authorization: Bearer $TOKEN" -
 ### Rqm2.2: Remove product from cart
 
 ```bash
-curl http://localhost:8080/products/cart/remove -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+curl "http://localhost:8080/products/cart/remove" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
 # Should return
 {
   "product": {
@@ -182,7 +182,7 @@ curl http://localhost:8080/products/cart/remove -H "Authorization: Bearer $TOKEN
 ### Rqm3.1: Create new order with payment
 
 ```bash
-curl http://localhost:8080/orders -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
+curl "http://localhost:8080/orders" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
 # Should return
 {
   "user": {
@@ -213,7 +213,7 @@ curl http://localhost:8080/orders -H "Authorization: Bearer $TOKEN" -H 'Content-
 ### Rqm3.2: Check the result
 
 ```bash
-curl http://localhost:8080/orders?page_id=1&page_size=5 -H "Authorization: Bearer $TOKEN" | jq
+curl "http://localhost:8080/orders?page_id=1&page_size=5" -H "Authorization: Bearer $TOKEN" | jq
 # Should return
 [
   {
@@ -351,7 +351,10 @@ docker start postgres
 docker rm postgres
 ```
 
-### Toolings Installation Guide
+### Tooling Installation Guide
+
+<details>
+    <summary>Expand</summary>
 
 - [**Golang**](https://go.dev/doc/install):
 
@@ -522,3 +525,5 @@ make mock
 ```bash
 migrate create -ext sql -dir db/migration -seq <migration_name>
 ```
+
+</details>

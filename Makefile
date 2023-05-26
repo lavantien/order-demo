@@ -43,4 +43,4 @@ order-demo:
 	- docker run --name order-demo --network order-network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres:5432/order_demo?sslmode=disable" -d order-demo:latest
 	- docker start order-demo
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock build clean order-demo
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock build clean order-demo all
