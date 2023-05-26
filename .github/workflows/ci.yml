@@ -42,5 +42,5 @@ jobs:
 
       - name: Test
         run: |
-          export GOPATH="."
+          export GOPATH="/"
           make test

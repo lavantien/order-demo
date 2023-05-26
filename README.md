@@ -18,9 +18,6 @@
 
 ### **Authorization Rules**
 
-<details>
-	<summary>See details</summary>
-
 ```go
 // From the server's routes, add authentication middleware, using Paseto Token with local symmetric encryption
 tokenMaker, _ := token.NewPasetoMaker(config.TokenSymmetricKey)
@@ -41,8 +38,6 @@ authRoutes.POST("/orders", server.createOrder)
 4. [X] A logged-in user can remove a product from card
 5. [X] A logged-in user can create an order
 6. [X] A logged-in user can only view a the orders that they've made
-
-</details>
 
 ### **API Endpoints**
 
