@@ -52,6 +52,9 @@ See **Booting Up** running and testing instructions in the section below first, 
 
 ```bash
 curl "http://localhost:8080/users" -H "Content-Type: application/json" -d '{"username":"tien1","full_name":"Tien La","email":"tien@email.com","password":"secret"}' | jq
+```
+
+```json
 # Should return
 {
   "username": "tien1",
@@ -66,6 +69,9 @@ curl "http://localhost:8080/users" -H "Content-Type: application/json" -d '{"use
 
 ```bash
 curl "http://localhost:8080/users/login" -H "Content-Type: application/json" -d '{"username":"tien1","password":"abc123"}' | jq
+```
+
+```json
 # Should return (401)
 {
   "error": "crypto/bcrypt: hashedPassword is not the hash of the given password"
@@ -80,6 +86,9 @@ If having the error `token has expired`, log in again
 
 ```bash
 curl "http://localhost:8080/users/login" -H "Content-Type: application/json" -d '{"username":"tien1","password":"secret"}' | jq
+```
+
+```json
 # Should return
 {
   "access_token": "v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMbpKMXH8ie-XTW6aKnIFgEfxZNnWXpsUl_QVTsuum1X2H_97UA0iqyP4NEG4JvWdqtrQ30HFN-BdvvXle98eUnKbCFn-28ot60kMGotwRySXJvI-LKCl04crKV31C6yjmKsj-2kPQ14d7eWM7bW8TyDm2DkPy5ZyrmrUTptk3LPLKZSCHPFDa9nfVwO_u4DcG-XZh_Nt6QB3NRTvSwVw.bnVsbA",
@@ -100,6 +109,9 @@ TOKEN='v2.local.iMAQ5gAOXIWxvl446dWq_Z7D7tV_J9MzRQov7HXEi0cbXFU0ZBhsR2GsHlhAeyMb
 
 ```bash
 curl "http://localhost:8080/users?page_id=1&page_size=5" -H "Authorization: Bearer $TOKEN" | jq
+```
+
+```json
 # Should return
 [
   {
@@ -116,6 +128,9 @@ curl "http://localhost:8080/users?page_id=1&page_size=5" -H "Authorization: Bear
 
 ```bash
 curl "http://localhost:8080/products?page_id=1&page_size=3" | jq
+```
+
+```json
 # Should return
 [
   {
@@ -146,6 +161,9 @@ curl "http://localhost:8080/products?page_id=1&page_size=3" | jq
 
 ```bash
 curl "http://localhost:8080/products/cart/add" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+```
+
+```json
 # Should return
 {
   "product": {
@@ -162,6 +180,9 @@ curl "http://localhost:8080/products/cart/add" -H "Authorization: Bearer $TOKEN"
 
 ```bash
 curl "http://localhost:8080/products/cart/remove" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}' | jq
+```
+
+```json
 # Should return
 {
   "product": {
@@ -178,6 +199,9 @@ curl "http://localhost:8080/products/cart/remove" -H "Authorization: Bearer $TOK
 
 ```bash
 curl "http://localhost:8080/orders" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"user_id":1,"product_id":1,"quantity":2}' | jq
+```
+
+```json
 # Should return
 {
   "user": {
@@ -209,6 +233,9 @@ curl "http://localhost:8080/orders" -H "Authorization: Bearer $TOKEN" -H 'Conten
 
 ```bash
 curl "http://localhost:8080/orders?page_id=1&page_size=5" -H "Authorization: Bearer $TOKEN" | jq
+```
+
+```json
 # Should return
 [
   {
@@ -262,7 +289,7 @@ make createdb
 make migrateup
 ```
 
-- Run test:
+- Run test and populate products:
 
 ```bash
 # go get github.com/golang/mock/mockgen/model
@@ -293,6 +320,8 @@ make migrateup
 
 make test
 
+make build
+
 make order-demo
 
 # Rebuild server image
@@ -306,9 +335,9 @@ make order-demo
 ```bash
 docker compose up -d
 
-# docker-compose down
+# docker compose down
 
-# docker rmi order-demo_api
+# make clean
 ```
 
 ## Development Infrastructure Setup
