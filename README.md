@@ -289,7 +289,7 @@ make postgres
 
 make createdb
 
-make migrate up
+make migrateup
 
 make test
 
