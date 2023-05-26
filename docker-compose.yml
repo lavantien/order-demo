@@ -6,6 +6,8 @@ services:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=order_demo
+    ports:
+      - "5432:5432"
   api:
     build:
       context: .
