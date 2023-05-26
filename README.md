@@ -309,7 +309,7 @@ make order-demo
 ### Docker Compose way
 
 ```bash
-docker-compose up
+docker compose up -d
 
 # docker-compose down
 
@@ -321,6 +321,10 @@ docker-compose up
 ### Helpful Commands
 
 ```bash
+# Update Go toolings
+go get -u
+go mod tidy
+
 # Spin up a container for local development, for example postgres
 # The default database will be root, the same name as POSTGRES_USER
 docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:alpine
